@@ -32,7 +32,22 @@ const WalletView = ({
     txs: []
   });
 
-  const getBtcKeys = useCallback( (): Bitcoin.ECPairInterface => {
+  const getAccountBalance = useCallback(async() => {
+    if (state.address.length > 0) {
+      const rosettaAccountBalance: AccountBalanceResponse = await state.rosettaClient.accountBalance({
+        account_identifier: {
+          address: state.address
+        },
+        network_identifier: NETWORK_IDENTIFIER,
+      })
+      setState(prevState => ({ ...prevState, balance: rosettaAccountBalance.balances[0].value }))
+    }
+  }, [state.address, state.rosettaClient])
+
+  /**
+   * Fetch BTC Keys
+   */
+  useEffect( () => {
     const derive_path = "84'/1'/0'/0/0"
     const seed = bip39.mnemonicToSeedSync(phrase)
     const master = Bitcoin.bip32.fromSeed(seed, Bitcoin.networks.testnet).derivePath(derive_path)
@@ -41,65 +56,47 @@ const WalletView = ({
       throw new Error('Could not get private key from phrase')
     }
   
-    return Bitcoin.ECPair.fromPrivateKey(master.privateKey, { network: Bitcoin.networks.testnet })
+    const btcKeys = Bitcoin.ECPair.fromPrivateKey(master.privateKey, { network: Bitcoin.networks.testnet })
+    setState(prevState => ({ ...prevState, btcKeys }))
   }, [phrase])
 
-  const deriveAddress = useCallback( async (btcKeys: Bitcoin.ECPairInterface): Promise<void> => {
-
-    try {
-      const deriveRequest: ConstructionDeriveRequest = {
-        network_identifier: NETWORK_IDENTIFIER,
-        public_key: {
-          hex_bytes: btcKeys.publicKey.toString('hex'),
-          curve_type: 'secp256k1',
-        },
-        metadata: {},
-      }
-      const res = await state.rosettaClient.derive(deriveRequest)
-      setState(prevState => ({ ...prevState, address: res.address ?? '' }))
-    } catch (error) {
-      return Promise.reject(error)
-    }
-  }, [state.rosettaClient])
-
-  const getAccountBalance = useCallback( async() => {
-
-    if (state.address.length > 0) {
-
-      const rosettaAccountBalance: AccountBalanceResponse = await state.rosettaClient.accountBalance({
-        account_identifier: {
-          address: state.address
-        },
-        network_identifier: NETWORK_IDENTIFIER,
-      })
-      setState(prevState => ({ ...prevState, balance: rosettaAccountBalance.balances[0].value }))
-
-    }
-
-  }, [state.address, state.rosettaClient])
-
-  const fetchAccountData = useCallback(async (btcKeys: Bitcoin.ECPairInterface) => {
-    /**
-     * Derive Address from key
-     */
-    await deriveAddress(btcKeys)
-
-    /**
-     * Fetch Balance
-     */
-    await getAccountBalance()
-  }, [deriveAddress, getAccountBalance])
-
+  /**
+   * Derive Address
+   */
   useEffect( () => {
-    /**
-     * Set BTC Keys
-     */
-    const btcKeys = getBtcKeys()
-    setState(prevState => ({ ...prevState, btcKeys }))
+    const deriveAddress = async (): Promise<void> => {
+      try {
+        if (!state.btcKeys) {
+          return
+        }
 
-    fetchAccountData(btcKeys)
+        const deriveRequest: ConstructionDeriveRequest = {
+          network_identifier: NETWORK_IDENTIFIER,
+          public_key: {
+            hex_bytes: state.btcKeys.publicKey.toString('hex'),
+            curve_type: 'secp256k1',
+          },
+          metadata: {},
+        }
+        const res = await state.rosettaClient.derive(deriveRequest)
+        setState(prevState => ({ ...prevState, address: res.address ?? '' }))
+      } catch (error) {
+        return Promise.reject(error)
+      }
+    }
+    deriveAddress()
+  }, [state.btcKeys, state.rosettaClient])
 
-  }, [getBtcKeys, fetchAccountData])
+  /**
+   * Get Account Balance
+   */
+  useEffect( () => {
+    try {
+      getAccountBalance() 
+    } catch (error) {
+      console.warn(error)
+    }
+  }, [getAccountBalance])
 
   const handleTransactionSuccess = (tx: {hash: string, amount: number}): void => {
     const txs = state.txs

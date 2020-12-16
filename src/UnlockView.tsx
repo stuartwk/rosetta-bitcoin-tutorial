@@ -3,7 +3,6 @@ import { TextArea, Form, Button, Grid, Icon, Segment, Divider, Header } from 'se
 import * as bip39 from 'bip39'
 
 export type UnlockViewProps = {
-  phrase: string
   submitPhrase(phrase: string): void
 }
 

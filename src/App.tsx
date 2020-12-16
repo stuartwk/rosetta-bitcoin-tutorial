@@ -16,7 +16,6 @@ function App() {
 
   return (
     <Container>
-      
       <Menu fixed='top' inverted>
         <Container>
           <Menu.Item as='a' header>
@@ -34,7 +33,7 @@ function App() {
 
       <Container style={{ marginTop: '7em' }}>
         {phrase.length < 1 
-          ? <UnlockView phrase={phrase} submitPhrase={(phrase: string) => setPhrase(phrase)}></UnlockView>
+          ? <UnlockView submitPhrase={(phrase: string) => setPhrase(phrase)}></UnlockView>
           : <WalletView phrase={phrase}></WalletView>
         }
       </Container>
