@@ -21,7 +21,7 @@ const TxList = ({
           {txs.map((tx) => {
             return (<List.Item key={tx.hash}>
               <List.Content>
-                <List.Header as='a'><a href={`https://blockstream.info/testnet/tx/${tx.hash}`} target="_blank" rel="noreferrer" style={{wordWrap: 'break-word'}}>{tx.hash}</a></List.Header>
+                <List.Header><a href={`https://blockstream.info/testnet/tx/${tx.hash}`} target="_blank" rel="noreferrer" style={{wordWrap: 'break-word'}}>{tx.hash}</a></List.Header>
                 <List.Description>₿ {tx.amount}</List.Description>
               </List.Content>
             </List.Item>);
