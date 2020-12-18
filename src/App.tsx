@@ -22,11 +22,13 @@ function App() {
             Bitcoin Rosetta Tutorial
           </Menu.Item>
           <Menu.Menu position='right'>
-            <Menu.Item>
-              <Button icon onClick={clearPhrase}>
-                <Icon name='sign out' />
-              </Button>
-            </Menu.Item>
+            {phrase.length > 0 &&
+              <Menu.Item>
+                <Button icon onClick={clearPhrase}>
+                  <Icon name='sign out' />
+                </Button>
+              </Menu.Item>
+            }
           </Menu.Menu>
         </Container>
       </Menu>

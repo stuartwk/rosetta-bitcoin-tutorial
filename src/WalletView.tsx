@@ -40,7 +40,9 @@ const WalletView = ({
         },
         network_identifier: NETWORK_IDENTIFIER,
       })
-      setState(prevState => ({ ...prevState, balance: rosettaAccountBalance.balances[0].value }))
+      if (rosettaAccountBalance.balances.length > 0) {
+        setState(prevState => ({ ...prevState, balance: rosettaAccountBalance.balances[0].value }))
+      }
     }
   }, [state.address, state.rosettaClient])
 
