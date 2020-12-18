@@ -11,6 +11,8 @@ export type WalletViewProps = {
   phrase: string
 }
 
+const LUNAR_API_KEY = '' // get an api from https://lunar.dev
+
 const WalletView = ({
   phrase,
 }: WalletViewProps) => {
@@ -26,7 +28,7 @@ const WalletView = ({
     }[]
   }>({
     btcKeys: null, 
-    rosettaClient: new RosettaClient({baseUrl: 'https://api.lunar.dev/v1', headers: { 'X-Api-Key': '1kdtEYp3HMm226RyMC33cgoSiAr' }}),
+    rosettaClient: new RosettaClient({baseUrl: 'https://api.lunar.dev/v1', headers: { 'X-Api-Key': LUNAR_API_KEY }}),
     address: '',
     balance: '',
     txs: []

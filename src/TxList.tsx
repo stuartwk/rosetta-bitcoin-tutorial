@@ -19,10 +19,10 @@ const TxList = ({
         </List>
       : <List divided>
           {txs.map((tx) => {
-            return (<List.Item as='a' key={tx.hash}>
+            return (<List.Item key={tx.hash}>
               <List.Content>
                 <List.Header as='a'><a href={`https://blockstream.info/testnet/tx/${tx.hash}`} target="_blank" rel="noreferrer" style={{wordWrap: 'break-word'}}>{tx.hash}</a></List.Header>
-                <List.Description as='a'>₿ {tx.amount}</List.Description>
+                <List.Description>₿ {tx.amount}</List.Description>
               </List.Content>
             </List.Item>);
           })}
