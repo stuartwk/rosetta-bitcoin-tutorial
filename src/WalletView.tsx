@@ -32,20 +32,6 @@ const WalletView = ({
     txs: []
   });
 
-  const getAccountBalance = useCallback(async() => {
-    if (state.address.length > 0) {
-      const rosettaAccountBalance: AccountBalanceResponse = await state.rosettaClient.accountBalance({
-        account_identifier: {
-          address: state.address
-        },
-        network_identifier: NETWORK_IDENTIFIER,
-      })
-      if (rosettaAccountBalance.balances.length > 0) {
-        setState(prevState => ({ ...prevState, balance: rosettaAccountBalance.balances[0].value }))
-      }
-    }
-  }, [state.address, state.rosettaClient])
-
   /**
    * Fetch BTC Keys
    */
@@ -90,7 +76,24 @@ const WalletView = ({
   }, [state.btcKeys, state.rosettaClient])
 
   /**
-   * Get Account Balance
+   * Fetch account balance
+   */
+  const getAccountBalance = useCallback(async() => {
+    if (state.address.length > 0) {
+      const rosettaAccountBalance: AccountBalanceResponse = await state.rosettaClient.accountBalance({
+        account_identifier: {
+          address: state.address
+        },
+        network_identifier: NETWORK_IDENTIFIER,
+      })
+      if (rosettaAccountBalance.balances.length > 0) {
+        setState(prevState => ({ ...prevState, balance: rosettaAccountBalance.balances[0].value }))
+      }
+    }
+  }, [state.address, state.rosettaClient])
+
+  /**
+   * Call Account Balance on init
    */
   useEffect( () => {
     try {
@@ -152,5 +155,3 @@ const WalletView = ({
 }
 
 export default WalletView;
-
-// bag ship planet iron army punch donor laundry city vault pepper autumn
