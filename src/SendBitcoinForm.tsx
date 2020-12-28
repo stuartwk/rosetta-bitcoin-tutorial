@@ -43,7 +43,7 @@ const SendBitcoinForm = ({
     const inputs = coins.reduce( (inputs: Operation[], coin, index) => {
       const totalInputsAmount = calculateOperationValue(inputs)
       
-      if (inputs.length < 1 || totalInputsAmount < amount) {
+      if (inputs.length < 1 || totalInputsAmount < (amount + fee)) {
         const input: Operation = {
           operation_identifier: {
             index: index,
@@ -116,6 +116,10 @@ const SendBitcoinForm = ({
     return totalOpsAmount
   }
 
+  /**
+   * Fetch Account Coins
+   * https://www.rosetta-api.org/docs/AccountApi.html#accountcoins
+   */
   const fetchAccountCoins = async (): Promise<Coin[]> => {
     if (userAddress.length > 0) {
       try {
@@ -127,7 +131,6 @@ const SendBitcoinForm = ({
           include_mempool: false
         })
         return accountCoinsResponse.coins
-        // setState(prevState => ({...prevState, coins: accountCoins.coins}))
       } catch (error) {
         return Promise.reject(error)
       }
@@ -136,6 +139,11 @@ const SendBitcoinForm = ({
     }
   }
 
+  /**
+   * Preprocess
+   * @param ops
+   * https://www.rosetta-api.org/docs/ConstructionApi.html#constructionpreprocess
+   */
   const constructionPreprocess = async (ops: Operation[]): Promise<ConstructionPreprocessResponse> => {
     try {
       return await rosettaClient.preprocess({
@@ -147,6 +155,11 @@ const SendBitcoinForm = ({
     }
   }
 
+  /**
+   * Construction Metadata
+   * @param preprocessRes 
+   * https://www.rosetta-api.org/docs/ConstructionApi.html#constructionmetadata
+   */
   const constructionMetadata = async (preprocessRes: ConstructionPreprocessResponse): Promise<ConstructionMetadataResponse> => {
     try {
       const body = {
@@ -160,6 +173,10 @@ const SendBitcoinForm = ({
     }
   }
 
+  /**
+   * Construction Paylods
+   * https://www.rosetta-api.org/docs/ConstructionApi.html#constructionpayloads
+   */
   const constructionPayloads = async (p: {
     metadataRes: ConstructionMetadataResponse
     ops: Operation[]
@@ -178,6 +195,10 @@ const SendBitcoinForm = ({
     }
   }
 
+  /**
+   * Construction Parse
+   * https://www.rosetta-api.org/docs/ConstructionApi.html#constructionparse
+   */
   const constructionParse = async (params: { signed: boolean; transaction: string }) => {
     const { signed, transaction } = params
 
@@ -217,6 +238,11 @@ const SendBitcoinForm = ({
     return true
   }
 
+  /**
+   * Construction Combine
+   * @param payloadsRes 
+   * https://www.rosetta-api.org/docs/ConstructionApi.html#constructioncombine
+   */
   const constructionCombine = async (payloadsRes: ConstructionPayloadsResponse): Promise<ConstructionCombineResponse> => {
     try {
       const signatures: Signature[] = payloadsRes.payloads.map( (payload) => ({
@@ -241,6 +267,11 @@ const SendBitcoinForm = ({
     }
   }
 
+  /**
+   * Construction Hash
+   * @param signedTx 
+   * https://www.rosetta-api.org/docs/ConstructionApi.html#constructionhash
+   */
   const constructionHash = async (signedTx: string): Promise<TransactionIdentifierResponse> => {
     try {
       const body = {
