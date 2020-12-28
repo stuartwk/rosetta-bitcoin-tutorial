@@ -214,6 +214,7 @@ const SendBitcoinForm = ({
     }
   }
 
+  // pulled from https://stackoverflow.com/questions/1068834/object-comparison-in-javascript
   const objectsEqual = (x: any, y: any): boolean => {
     if (x === y) return true
   
@@ -284,6 +285,11 @@ const SendBitcoinForm = ({
     }
   }
 
+  /**
+   * Construction Submit
+   * @param signedTx 
+   * https://www.rosetta-api.org/docs/ConstructionApi.html#constructionsubmit
+   */
   const constructionSubmit = async (signedTx: string): Promise<TransactionIdentifierResponse> => {
     try {
       const body = {
