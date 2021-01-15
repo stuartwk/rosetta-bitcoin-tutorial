@@ -214,29 +214,41 @@ const SendBitcoinForm = ({
     }
   }
 
-  // pulled from https://stackoverflow.com/questions/1068834/object-comparison-in-javascript
-  const objectsEqual = (x: any, y: any): boolean => {
-    if (x === y) return true
-  
-    if (!(x instanceof Object) || !(y instanceof Object)) return false
-  
-    if (x.constructor !== y.constructor) return false
-  
-    for (const p in x) {
-      if (!x.hasOwnProperty(p)) continue
-  
-      if (!y.hasOwnProperty(p)) return false
-  
-      if (x[p] === y[p]) continue
-  
-      if (typeof x[p] !== 'object') return false
-  
-      if (!objectsEqual(x[p], y[p])) return false
+  // compare two arrays of operations to make sure they match
+  const operationsEqual = (intent: Operation[], operations: Operation[]): boolean => {
+
+    // ensure lengths match
+    if (intent.length !== operations.length) {
+      return false;
     }
-  
-    for (const p in y) if (y.hasOwnProperty(p) && !x.hasOwnProperty(p)) return false
-  
+
+    for (let i = 0; i < operations.length; i++) {
+      const op = operations[i];
+      const intentOp = intent[i];
+
+      // check addresses match
+      if (op.account?.address !== intentOp.account?.address) {
+        return false
+      }
+
+      // check if ammounts match
+      if (op.amount?.value !== intentOp.amount?.value) {
+        return false
+      }
+
+      // check ammount currency type
+      if (op.amount?.currency.symbol !== intentOp.amount?.currency.symbol) {
+        return false
+      }
+
+      // check op types
+      if (op.type !== intentOp.type) {
+        return false
+      }
+    }
+
     return true
+
   }
 
   /**
@@ -352,7 +364,10 @@ const SendBitcoinForm = ({
         transaction: payloads.unsigned_transaction,
       })
 
-      if (objectsEqual(parsedUnsigned.operations, ops)) {
+      /**
+       * Check unsigned operations from construction parse match the intent
+       */
+      if (!operationsEqual(parsedUnsigned.operations, ops)) {
         return Promise.reject('Unsigned Parsed Operations do not match')
       }
 
@@ -369,8 +384,10 @@ const SendBitcoinForm = ({
         transaction: combine.signed_transaction,
       })
 
-      // if (parseSigned.operations != ops) {
-      if (objectsEqual(parseSigned.operations, ops)) {
+      /**
+       * Check signed operations from construction parse match the intent
+       */
+      if (!operationsEqual(parseSigned.operations, ops)) {
         return Promise.reject('Signed Parsed Operations do not match')
       }
 
